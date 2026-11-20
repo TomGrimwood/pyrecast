@@ -1,6 +1,6 @@
 [project]
 name = "pyrecast"
-version = "0.1.0"
+version = "0.1.1"
 description = "Recast (recastnavigation) navmeshes from Python: triangles and instanced meshes in, a navmesh's polygons, detail triangles and neighbours out, as NumPy arrays."
 readme = "README.md"
 license = "Zlib"

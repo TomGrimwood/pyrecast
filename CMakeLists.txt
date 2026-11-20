@@ -14,6 +14,8 @@ FetchContent_Declare(
   URL https://github.com/recastnavigation/recastnavigation/archive/refs/tags/v1.6.0.tar.gz
   URL_HASH SHA256=d48ca0121962fa0639502c0f56c4e3ae72f98e55d88727225444f500775c0074
 )
+# Recast 1.6.0 asks for CMake 3.0, which CMake 4 refuses: read as 3.5, which it builds with.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "" FORCE)
 set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "" FORCE)
 set(RECASTNAVIGATION_EXAMPLES OFF CACHE BOOL "" FORCE)
