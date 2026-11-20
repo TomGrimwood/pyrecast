@@ -1,0 +1,60 @@
+# Wheels for Linux (x86_64, aarch64) and Windows (AMD64), CPython 3.12 and later, built by
+# cibuildwheel (its settings: pyproject.toml's [tool.cibuildwheel]) and each tested against the
+# package's tests. Every run keeps them as artifacts; a tag v* also attaches them, with the
+# source, to that tag's GitHub release. Nothing is published to PyPI.
+name: wheels
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wheels:
+    name: wheels (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Each runner builds for its own architecture: no emulation.
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pypa/cibuildwheel@v3.4.1
+        with:
+          output-dir: wheelhouse
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+
+  sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv build --sdist --out-dir dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [wheels, sdist]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # to make the release and attach the files
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*

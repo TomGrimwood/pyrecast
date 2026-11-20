@@ -1,0 +1,55 @@
+[project]
+name = "pyrecast"
+version = "0.1.0"
+description = "Recast (recastnavigation) navmeshes from Python: triangles and instanced meshes in, a navmesh's polygons, detail triangles and neighbours out, as NumPy arrays."
+readme = "README.md"
+license = "Zlib"
+requires-python = ">=3.12"
+dependencies = ["numpy>=2"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.17.6",
+    "ty>=0.0.107",
+]
+
+[build-system]
+# Recast (C++) is built with the package: CMake fetches its pinned release, nanobind binds it.
+requires = ["scikit-build-core>=0.11", "nanobind>=2.4"]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+wheel.packages = ["src/pyrecast"]
+cmake.version = ">=3.18"
+build-dir = "build/{wheel_tag}"
+# The python package and its extension only, not what Recast installs (CMakeLists.txt).
+install.components = ["python"]
+
+[tool.cibuildwheel]
+# CPython 3.12 and later (requires-python), each for the runner's own architecture: Linux
+# x86_64 and aarch64 (manylinux), Windows AMD64 (.github/workflows/wheels.yml). Not built:
+# musllinux, free-threaded Python.
+archs = ["native"]
+skip = ["*-musllinux_*", "cp3??t-*"]
+# The tests, run against the installed wheel from a copy of them.
+test-requires = ["pytest>=8"]
+test-sources = ["tests", "pyproject.toml"]
+test-command = "pytest"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --no-header --tb=short -p no:cacheprovider --import-mode=importlib"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+# Made by nanobind from the compiled module (AGENTS.md says how).
+extend-exclude = ["src/pyrecast/_core.pyi"]
+
+[tool.ruff.lint]
+# PLW1514 (a text file opened without saying its encoding) is a preview rule: it alone.
+preview = true
+explicit-preview-rules = true
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "RUF", "PLW1514"]
+ignore = ["E501"]
